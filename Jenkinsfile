@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 pipeline {
-  agent { label 'avolin-tradebeam-isupply-linux' }
+  agent { label 'avolin-tradebeam-isupply || avolin-tradebeam-linux' }
   
   options {
     timestamps()
