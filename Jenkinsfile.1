@@ -1,0 +1,37 @@
+#!/usr/bin/env groovy
+pipeline {
+  agent { label 'avolin-tradebeam-isupply || avolin-tradebeam-linux' }
+  
+  options {
+    timestamps()
+  }
+
+  environment {
+    INSTALLER = 'installer.stg.ssi.tradebeam.dev.avolin.com'
+  }
+  
+  stages {
+
+    stage('test') {
+      steps {
+        
+        sshagent(credentials : ["avolin-tradebeam-ssh"]) {
+          sh "ssh -o StrictHostKeyChecking=no root@${INSTALLER} uptime"
+          sh "ssh -v root@${INSTALLER}"
+          sh "scp root@${INSTALLER}:/export/usr/ops/ssi/RPMS/isupply-deploy-resources.zip ${WORKSPACE}/"
+        }
+
+        nexusArtifactUploader artifacts: [
+          [artifactId: 'tradebeam-isupply', classifier: '', file: "isupply-deploy-resources.zip", type: 'zip']
+          ], credentialsId: 'central.jnk.nexus', groupId: 'avolin', nexusUrl: 'nexus.devfactory.com', nexusVersion: 'nexus3', 
+          protocol: 'https', repository: "avolin-tradebeam-shared", version: "deploy-resources"
+
+      }
+    }
+      
+    
+    
+  }
+
+
+}
